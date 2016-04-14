@@ -22,6 +22,7 @@ import (
 )
 
 /*
+Postgresql 9.5
 CREATE TABLE public.profile
 (
   body jsonb NOT NULL -- profile body
