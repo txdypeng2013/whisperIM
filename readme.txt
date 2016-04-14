@@ -1,27 +1,27 @@
-对外协议: HTTP(https://)  WebsocketSecurity(wss://)
+Protocol: HTTP(https://)  WebsocketSecurity(wss://)
 
-通用返回信息
+Generate Response Code
 {"code":200,"message":"Success","ok":true}
 {"code":403,"message":"Protocol Error","ok":false}
 {"code":500,"message":"Internal Server Error","ok":false}
 
-1）资源路径 /im/www/v1/    
-访问如 https://minami.cc/im/www/v1/chat.html
+1) Resource Path /im/www/v1/    
+ex: https://host.com/im/www/v1/chat.html
 
-2）注册 https://minami.cc/im/register    
-协议: POST
-数据: ajax.Post(JSON.{})
-account  string	账号 必填
-password string	密码 必填
-name     string	昵称 选填, 不填则为account
-picture  string	头像 选填, base64编码
-sex      string 性别 选填
-birthday string 生日 选填
-sign     string 签名 选填
-mail     string 密保 必填
-成功返回: 
+2) Register https://host.com/im/register    
+Protocol: POST
+Data: ajax.Post(JSON.{})
+account  string not null
+password string	not null
+name     string	null allowed  if null, then will be account
+picture  string	null allowed  base64
+sex      string null allowed
+birthday string null allowed
+sign     string null allowed
+mail     string not null      used for when forget password 
+On Success: 
 {"code":200,"message":"Success","ok":true}
-错误返回: 
+On Panic: 
 {"code":403,"message":"Protocol Error","ok":false}
 {"code":500,"message":"Internal Server Error","ok":false}
 {"code":501,"message":"Account Info Empty","ok":false}
@@ -29,92 +29,92 @@ mail     string 密保 必填
 {"code":503,"message":"Secure Mail Info Empty","ok":false}
 {"code":504,"message":"Account Already Exists","ok":false}
 
-3）登陆 wss://minami.cc/im/login
-协议: WebSocket
-数据: wss://minami.cc/im/login/im/login?account=xxx&password=xxx
-account  string	账号 必填
-password string	密码 必填
-成功返回: 
+3) Login wss://host.com/im/login
+Protocol: WebSocket
+Data: wss://host.com/im/login/im/login?account=xxx&password=xxx
+account  string	login account not null
+password string	password      not null
+On Success: 
 {
   "code": 200,
   "friends": [
     {
-      "id": "f69f9777de910b9990e407cbedc243be",//好友id
-      "name": "新朋友223",//好友昵称(我定义的好友别名，非好友自定义的name)
-      "picture": "img/base64:01010101010101010101010",//好友头像(base64编码)
-      "sex": "女",//好友性别
-      "birthday": "1937-07-07",//好友生日
-      "sign": "俄罗斯了",//好友签名
-      "online": false//好友是否在线
+      "id": "f69f9777de910b9990e407cbedc243be",//friend id
+      "name": "Sunny Tom",//friend alias(named by yourself, but not the one named by friend himself)
+      "picture": "img/base64:01010101010101010101010",//base64
+      "sex": "male",
+      "birthday": "1937-07-07",
+      "sign": "The Strong Tom",
+      "online": false
     }
   ],
   "message": "Success",
   "ok": true,
   "profile": {
-    "id": "61810e422ec1f24f2175c05a631c9a8f",//我的id，需要保存，auth认证时会用到
-    "name": "minami",//我的别名
-    "picture": "img/base64:01010101010101010101010",//我的头像(base64编码)
-    "sex": "男",//我的性别
-    "birthday": "1927-01-01",//我的生日
-    "sign": "吃了吗?"//我的签名
+    "id": "61810e422ec1f24f2175c05a631c9a8f",//my id, must be remember, reason for auth
+    "name": "Funny John",//my name
+    "picture": "img/base64:01010101010101010101010",//base64
+    "sex": "male",
+    "birthday": "1927-01-01",
+    "sign": "I wanna to Mars"
   },
   "requests": [
     {
-      "id": "f69f9777de910b9990e407cbedc243be",//申请人id
-      "name": "minami",//申请人名称
-      "to": "61810e422ec1f24f2175c05a631c9a8f",//我的id，此处可以忽略
-      "note": "女票"//申请信息
+      "id": "f69f9777de910b9990e407cbedc243be",//id of who request for friend
+      "name": "Alex",//guy's name
+      "to": "61810e422ec1f24f2175c05a631c9a8f",//my id, this coule be ignore
+      "note": "Hello John, this is Alex"//the information of request
     }
   ],
-  "token": "2ab3a1db5cc70776319eb5bef385af79"//token，需要保存，后继请求(非WebSocket通道)auth认证时会用到
+  "token": "2ab3a1db5cc70776319eb5bef385af79"//token, must be remember, reason for auth
 }
-注: 
-friends 好友信息,没有好友时为null
-profile 当前用户信息 
-requests 好友申请,没有申请时为null
-错误返回: 
+note: 
+friends  information of friends, if have no friend, this will be null
+profile  my profile
+requests guy who request to be friend, if have no request, this will be null
+On Panic: 
 {"code":500,"message":"Internal Server Error","ok":false}
 {"code":505,"message":"Account & Password Wrong","ok":false}
 
-4）发现好友 https://minami.cc/im/friends/found  
-协议: GET
-数据: https://minami.cc/im/friends/found?id=xxx&token=xxx&name=xxx
-id    string	我的id 必填
-token string	token 必填
-name  string    好友名称
-成功返回: 
+4) Search Friend https://host.com/im/friends/found  
+Protocol: GET
+Data: https://host.com/im/friends/found?id=xxx&token=xxx&name=xxx
+id    string	my id                         not null
+token string	token                         not null
+name  string    the guy's name searching for  not null
+On Success: 
 {
   "code": 200,
   "found": [
     {
       "id": "61810e422ec1f24f2175c05a631c9a8f",
-      "name": "minami",
+      "name": "Minami",
       "picture": "img/base64:01010101010101010101010",
-      "sex": "男",
+      "sex": "female",
       "birthday": "1927-01-01",
-      "sign": "吃了吗?"
+      "sign": "I'am so Happy everyday"
     }
   ],
   "message": "Success",
   "ok": true
 }
-错误返回: 
+On Panic: 
 {"code":500,"message":"Internal Server Error","ok":false}
 {"code":514,"message":"Auth Info Empty","ok":false}
 {"code":515,"message":"Auth Illegal","ok":false}
 {"code":516,"message":"Name Empty","ok":false}
 {"code":517,"message":"Account ID Empty","ok":false}
 
-5）申请好友 https://minami.cc/im/friends/request  
-协议: GET
-数据: https://minami.cc/im/friends/request?id=xxx&token=xxx&to=xxx&note=xxx
-id    string	我的id   必填
-token string	token   必填
-to    string    好友id   必填
-note  string    申请信息
-成功返回: 
+5) Request Friend https://host.com/im/friends/request  
+Protocol: GET
+Data: https://host.com/im/friends/request?id=xxx&token=xxx&to=xxx&note=xxx
+id    string	my id              not null
+token string	token              not null
+to    string    the guy's id       not null
+note  string    apply information  null allowed
+On Success: 
 {"code":200,"message":"Success","ok":true}
-错误返回: 
+On Panic: 
 {"code":500,"message":"Internal Server Error","ok":false}
 {"code":514,"message":"Auth Info Empty","ok":false}
 {"code":515,"message":"Auth Illegal","ok":false}
@@ -123,16 +123,16 @@ note  string    申请信息
 {"code":522,"message":"Already Be Friend","ok":false}
 {"code":523,"message":"Friend Not Exists","ok":false}
 
-6）添加好友 https://minami.cc/im/friends/add  
-协议: GET
-数据: https://minami.cc/im/friends/add?id=xxx&token=xxx&from=xxx&name=xxx
-id    string	我的id   必填
-token string	token   必填
-from  string    好友id   必填
-name  string    好友别名  必填
-成功返回: 
+6) Add Friend https://host.com/im/friends/add  
+Protocol: GET
+Data: https://host.com/im/friends/add?id=xxx&token=xxx&from=xxx&name=xxx
+id    string	my id              not null
+token string	token              not null
+from  string    friend's id        not null
+name  string    named by yourself  not null
+On Success: 
 {"code":200,"message":"Success","ok":true}
-错误返回: 
+On Panic: 
 {"code":500,"message":"Internal Server Error","ok":false}
 {"code":514,"message":"Auth Info Empty","ok":false}
 {"code":515,"message":"Auth Illegal","ok":false}
@@ -142,15 +142,15 @@ name  string    好友别名  必填
 {"code":522,"message":"Already Be Friend","ok":false}
 {"code":523,"message":"Friend Not Exists","ok":false}
 
-7）移除好友 https://minami.cc/im/friends/remove  
-协议: GET
-数据: https://minami.cc/im/friends/remove?id=xxx&token=xxx&to=xxx
-id    string	我的id   必填
-token string	token   必填
-to    string    好友id   必填
-成功返回: 
+7) Remove Friend https://host.com/im/friends/remove  
+Protocol: GET
+Data: https://host.com/im/friends/remove?id=xxx&token=xxx&to=xxx
+id    string	my id         not null
+token string	token         not null
+to    string    friend's id   not null
+On Success: 
 {"code":200,"message":"Success","ok":true}
-错误返回: 
+On Panic: 
 {"code":500,"message":"Internal Server Error","ok":false}
 {"code":512,"message":"Not Relation of Friend","ok":false}
 {"code":514,"message":"Auth Info Empty","ok":false}
@@ -158,34 +158,34 @@ to    string    好友id   必填
 {"code":517,"message":"Account ID Empty","ok":false}
 {"code":519,"message":"Friend Info Empty","ok":false}
 
-8）发送会话 WebSocket Tunnel
-协议: tunnel
-数据: wss.sendMessage(JSON.{})
-id       string	流水，标识每次会话  必填
-toFriend string	好友id           必填
-payload  string	消息             必填
+8) Send Dialogue WebSocket Tunnel
+Protocol: tunnel
+Data: wss.sendMessage(JSON.{})
+id       string	 sequence, mark each dialogue  not null
+toFriend string	 friend's id                   not null
+payload  string  message                       not null
 
-9）接收会话 WebSocket Tunnel
-协议: tunnel
-数据: wss.receiveMessage(JSON.{})
-id       string	流水，标识每次会话  
-from     string	好友id           
-payload  string	消息            
+9) Receive Dialogue WebSocket Tunnel
+Protocol: tunnel
+Data: wss.receiveMessage(JSON.{})
+id       string	 sequence, mark each dialogue  
+from     string	 friend's id         
+payload  string	 message           
 
-wss.sendMessage(JSON.{}) 成功返回
-{"code":200,"message":"Success","ok":true,"id":"xxx"}//id值为（id  string	流水，标识每次会话  必填）
+wss.sendMessage(JSON.{}) On Success
+{"code":200,"message":"Success","ok":true,"id":"xxx"}//id is defined above(id  string sequence, mark each dialogue  not null)
 
-wss.sendMessage(JSON.{}) 失败返回
+wss.sendMessage(JSON.{}) On Panic
 {"code":500,"message":"Internal Server Error","ok":false}
 {"code":506,"message":"Dialogue ID Empty","ok":false}
-{"code":507,"message":"Dialogue Send To Friend Failed","ok":false,"id":"xxx"}//id值为（id  string	流水，标识每次会话  必填）
-{"code":508,"message":"Friend Is Offline","ok":false,"id":"xxx"}//id值为（id  string	流水，标识每次会话  必填）
+{"code":507,"message":"Dialogue Send To Friend Failed","ok":false,"id":"xxx"}//id is defined above(id  string sequence, mark each dialogue  not null) 
+{"code":508,"message":"Friend Is Offline","ok":false,"id":"xxx"}//id is defined above(id  string sequence, mark each dialogue  not null) 
 {"code":510,"message":"Friend ID Empty","ok":false}
 {"code":511,"message":"Payload Empty","ok":false}
 {"code":512,"message":"Not Relation of Friend","ok":false}
 
-接收到会话消息
-{"from":"61810e422ec1f24f2175c05a631c9a8f","payload":"吃饭了吗？"}
+Receive Dialogue
+{"from":"61810e422ec1f24f2175c05a631c9a8f","payload":"How are you ?"}
 
 
 
