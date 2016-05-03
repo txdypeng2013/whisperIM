@@ -61,6 +61,7 @@ type Profile struct {
 	Sign     string            `json:"sign"`
 	Mail     string            `json:"mail"`
 	Friends  map[string]string `json:"friends"` // friend id : user-defined alias
+	Token    string            `json:"token,omitempty"`
 }
 
 type ProfileShow struct {
@@ -115,6 +116,7 @@ func main() {
 	http.HandleFunc("/im/friends/request", requestFriendHandle)
 	http.HandleFunc("/im/friends/add", addFriendHandle)
 	http.HandleFunc("/im/friends/remove", removeFriendHandle)
+	http.HandleFunc("/im/profile/update", updateProfileHandle)
 
 	certMinami, err := tls.LoadX509KeyPair(crt, key)
 	if err != nil {
@@ -127,7 +129,7 @@ func main() {
 		Handler:        nil,
 		ReadTimeout:    time.Minute * 1,
 		WriteTimeout:   time.Minute * 1,
-		MaxHeaderBytes: 1 << 20,
+		MaxHeaderBytes: 2 << 10,
 		TLSConfig: &tls.Config{
 			Certificates: []tls.Certificate{certMinami},
 			//			ClientAuth: tls.RequestClientCert,
@@ -279,6 +281,7 @@ func loginHandle(w http.ResponseWriter, req *http.Request) {
 		if user != nil {
 			delete(pool, user.id)
 			delete(auth, user.token)
+			user.notifyOffLine()
 		}
 		if conn != nil {
 			conn.Close()
@@ -547,6 +550,36 @@ func (user *User) sendMessage(toFriend, message string) (Err error) {
 	}
 
 	return
+}
+
+func (user *User) notifyOffLine() {
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Error(err)
+			log.Error(string(debug.Stack()))
+		}
+	}()
+
+	if user.friends != nil {
+
+		offLineCode := code.CodeDeclare[300]
+		responseMsg := make(map[string]interface{})
+		responseMsg["id"] = user.id
+		responseMsg["code"] = offLineCode.Code
+		responseMsg["message"] = offLineCode.Message
+		responseMsg["ok"] = offLineCode.Ok
+
+		response, err := json.Marshal(responseMsg)
+		if err != nil {
+			panic(err)
+		}
+		payload := string(response)
+
+		for toFriend, _ := range user.friends {
+			user.sendMessage(toFriend, payload)
+		}
+	}
 }
 
 func getResponseMsg(status int) string {
@@ -961,5 +994,160 @@ func friendExists(id string) bool {
 		return false
 	} else {
 		return true
+	}
+}
+
+func updateProfileHandle(w http.ResponseWriter, req *http.Request) {
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Error(err)
+			log.Error(string(debug.Stack()))
+			io.WriteString(w, getResponseMsg(500))
+		}
+	}()
+
+	if req.Method != "POST" {
+		io.WriteString(w, getResponseMsg(403))
+		return
+	}
+
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	profile := &Profile{}
+	if err := json.Unmarshal(body, profile); err != nil {
+		panic(err)
+	}
+
+	profile.Id = strings.TrimSpace(profile.Id)
+	profile.Account = strings.TrimSpace(profile.Account)
+	profile.Password = strings.TrimSpace(profile.Password)
+	profile.Name = strings.TrimSpace(profile.Name)
+	profile.Picture = strings.TrimSpace(profile.Picture)
+	profile.Sex = strings.TrimSpace(profile.Sex)
+	profile.Birthday = strings.TrimSpace(profile.Birthday)
+	profile.Sign = strings.TrimSpace(profile.Sign)
+	profile.Mail = strings.TrimSpace(profile.Mail)
+	profile.Token = strings.TrimSpace(profile.Token)
+
+	if profile.Token == "" {
+		io.WriteString(w, getResponseMsg(514))
+		return
+	}
+
+	if profile.Id == "" {
+		io.WriteString(w, getResponseMsg(517))
+		return
+	}
+
+	if userId, ok := auth[profile.Token]; !ok || userId != profile.Id {
+		io.WriteString(w, getResponseMsg(515))
+		return
+	}
+
+	tx, err := DB.Begin()
+	if err != nil {
+		panic(err)
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Error(err)
+			log.Error(string(debug.Stack()))
+			tx.Rollback()
+			io.WriteString(w, getResponseMsg(500))
+		} else {
+			tx.Commit()
+			go notifyProfile(profile.Id)
+		}
+	}()
+
+	if profile.Account != "" {
+		if _, err := tx.Exec(`update profile set body = jsonb_set(body, '{account}', $1) where body->'id' ? $2`, `"`+profile.Account+`"`, profile.Id); err != nil {
+			panic(err)
+		}
+	}
+	if profile.Password != "" {
+		if _, err := tx.Exec(`update profile set body = jsonb_set(body, '{password}', $1) where body->'id' ? $2`, `"`+profile.Password+`"`, profile.Id); err != nil {
+			panic(err)
+		}
+	}
+	if profile.Name != "" {
+		if _, err := tx.Exec(`update profile set body = jsonb_set(body, '{name}', $1) where body->'id' ? $2`, `"`+profile.Name+`"`, profile.Id); err != nil {
+			panic(err)
+		}
+	}
+	if profile.Picture != "" {
+		if _, err := tx.Exec(`update profile set body = jsonb_set(body, '{picture}', $1) where body->'id' ? $2`, `"`+profile.Picture+`"`, profile.Id); err != nil {
+			panic(err)
+		}
+	}
+	if profile.Sex != "" {
+		if _, err := tx.Exec(`update profile set body = jsonb_set(body, '{sex}', $1) where body->'id' ? $2`, `"`+profile.Sex+`"`, profile.Id); err != nil {
+			panic(err)
+		}
+	}
+	if profile.Birthday != "" {
+		if _, err := tx.Exec(`update profile set body = jsonb_set(body, '{birthday}', $1) where body->'id' ? $2`, `"`+profile.Birthday+`"`, profile.Id); err != nil {
+			panic(err)
+		}
+	}
+	if profile.Sign != "" {
+		if _, err := tx.Exec(`update profile set body = jsonb_set(body, '{sign}', $1) where body->'id' ? $2`, `"`+profile.Sign+`"`, profile.Id); err != nil {
+			panic(err)
+		}
+	}
+	if profile.Mail != "" {
+		if _, err := tx.Exec(`update profile set body = jsonb_set(body, '{mail}', $1) where body->'id' ? $2`, `"`+profile.Mail+`"`, profile.Id); err != nil {
+			panic(err)
+		}
+	}
+
+	io.WriteString(w, getResponseMsg(200))
+}
+
+func notifyProfile(myId string) {
+
+	time.Sleep(time.Second * 1)
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Error(err)
+			log.Error(string(debug.Stack()))
+		}
+	}()
+
+	profile := getProfile("", "", myId)
+	if profile == nil {
+		return
+	}
+
+	refreshCode := code.CodeDeclare[301]
+	responseMsg := make(map[string]interface{})
+	responseMsg["code"] = refreshCode.Code
+	responseMsg["message"] = refreshCode.Message
+	responseMsg["ok"] = refreshCode.Ok
+	responseMsg["id"] = profile.Id
+	responseMsg["name"] = profile.Name
+	responseMsg["picture"] = profile.Picture
+	responseMsg["sex"] = profile.Sex
+	responseMsg["birthday"] = profile.Birthday
+	responseMsg["sign"] = profile.Sign
+
+	response, err := json.Marshal(responseMsg)
+	if err != nil {
+		panic(err)
+	}
+	payload := string(response)
+
+	for id, user := range pool {
+		if user.friends != nil {
+			if _, ok := user.friends[myId]; ok {
+				pool[id].sendMessage(id, payload)
+			}
+		}
 	}
 }
