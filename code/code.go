@@ -18,6 +18,18 @@ func init() {
 		Ok:      true,
 	}
 
+	CodeDeclare[300] = &Code{
+		Code:    300,
+		Message: "Friend Offline",
+		Ok:      true,
+	}
+
+	CodeDeclare[301] = &Code{
+		Code:    301,
+		Message: "Refresh Friend's Profile",
+		Ok:      true,
+	}
+
 	CodeDeclare[403] = &Code{
 		Code:    403,
 		Message: "Protocol Error",
