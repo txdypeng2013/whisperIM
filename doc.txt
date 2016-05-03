@@ -187,6 +187,40 @@ wss.sendMessage(JSON.{}) On Panic
 Receive Dialogue
 {"from":"61810e422ec1f24f2175c05a631c9a8f","payload":"How are you ?"}
 
+10) Update Profile https://host.com/im/profile/update    
+Protocol: POST
+Data: ajax.Post(JSON.{})
+id       string	  my id    not null
+token    string	  token    not null
+account  string            null allowed
+password string	           null allowed
+name     string	           null allowed  
+picture  string	           null allowed  base64
+sex      string            null allowed
+birthday string            null allowed
+sign     string            null allowed
+mail     string            null allowed
+On Success: 
+{"code":200,"message":"Success","ok":true}
+On Panic: 
+{"code":403,"message":"Protocol Error","ok":false}
+{"code":500,"message":"Internal Server Error","ok":false}
+{"code":514,"message":"Auth Info Empty","ok":false}
+{"code":515,"message":"Auth Illegal","ok":false}
+{"code":517,"message":"Account ID Empty","ok":false}
 
-
+11) Server Notify Friend's Profile When Friend Edit Profile
+Protocol: tunnel
+Data: wss.receiveMessage(JSON.{})
+{
+  "code": 301,
+  "message": "Refresh Friend's Profile",
+  "ok": true,
+  "id": "61810e422ec1f24f2175c05a631c9a8f",
+  "name": "Funny John",
+  "picture": "img/base64:01010101010101010101010",
+  "sex": "male",
+  "birthday": "1927-01-01",
+  "sign": "I wanna to Mars"
+}
 
