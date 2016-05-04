@@ -15,9 +15,12 @@ now all is under developing in branch dev.
     6)remove friends
     7)update profile
     8)realtime push profile to client
-    9)talk to friends
+    9)talk to friends, only can one to one now
 
     Next
+	
+	create group, friends talks to friends
 
 #### Client Part:
 
+    developing
