@@ -110,6 +110,7 @@ func main() {
 	defer db.Close()
 
 	http.Handle("/im/www/v1/", http.StripPrefix("/im/www/v1/", http.FileServer(http.Dir("example"))))
+	http.Handle("/whisperIM/", http.StripPrefix("/whisperIM/", http.FileServer(http.Dir("www"))))
 	http.HandleFunc("/im/register", registerHandle)
 	http.HandleFunc("/im/login", loginHandle)
 	http.HandleFunc("/im/friends/found", foundFriendHandle)
