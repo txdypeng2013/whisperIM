@@ -111,13 +111,13 @@ func main() {
 
 	http.Handle("/im/www/v1/", http.StripPrefix("/im/www/v1/", http.FileServer(http.Dir("example"))))
 	http.Handle("/whisperIM/", http.StripPrefix("/whisperIM/", http.FileServer(http.Dir("www"))))
-	http.HandleFunc("/im/register", registerHandle)
-	http.HandleFunc("/im/login", loginHandle)
-	http.HandleFunc("/im/friends/found", foundFriendHandle)
-	http.HandleFunc("/im/friends/request", requestFriendHandle)
-	http.HandleFunc("/im/friends/add", addFriendHandle)
-	http.HandleFunc("/im/friends/remove", removeFriendHandle)
-	http.HandleFunc("/im/profile/update", updateProfileHandle)
+	http.HandleFunc("/whisperIM/register", registerHandle)
+	http.HandleFunc("/whisperIM/login", loginHandle)
+	http.HandleFunc("/whisperIM/friends/found", foundFriendHandle)
+	http.HandleFunc("/whisperIM/friends/request", requestFriendHandle)
+	http.HandleFunc("/whisperIM/friends/add", addFriendHandle)
+	http.HandleFunc("/whisperIM/friends/remove", removeFriendHandle)
+	http.HandleFunc("/whisperIM/profile/update", updateProfileHandle)
 
 	certMinami, err := tls.LoadX509KeyPair(crt, key)
 	if err != nil {

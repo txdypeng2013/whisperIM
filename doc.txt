@@ -5,10 +5,10 @@ Generate Response Code
 {"code":403,"message":"Protocol Error","ok":false}
 {"code":500,"message":"Internal Server Error","ok":false}
 
-1) Resource Path /im/www/v1/    
-ex: https://host.com/im/www/v1/chat.html
+1) Resource Path /whisperIM/  
+ex: https://host.com/whisperIM/hello.html
 
-2) Register https://host.com/im/register    
+2) Register https://host.com/whisperIM/register    
 Protocol: POST
 Data: ajax.Post(JSON.{})
 account  string not null
@@ -29,9 +29,9 @@ On Panic:
 {"code":503,"message":"Secure Mail Info Empty","ok":false}
 {"code":504,"message":"Account Already Exists","ok":false}
 
-3) Login wss://host.com/im/login
+3) Login wss://host.com/whisperIM/login
 Protocol: WebSocket
-Data: wss://host.com/im/login/im/login?account=xxx&password=xxx
+Data: wss://host.com/whisperIM/login/whisperIM/login?account=xxx&password=xxx
 account  string	login account not null
 password string	password      not null
 On Success: 
@@ -76,9 +76,9 @@ On Panic:
 {"code":500,"message":"Internal Server Error","ok":false}
 {"code":505,"message":"Account & Password Wrong","ok":false}
 
-4) Search Friend https://host.com/im/friends/found  
+4) Search Friend https://host.com/whisperIM/friends/found  
 Protocol: GET
-Data: https://host.com/im/friends/found?id=xxx&token=xxx&name=xxx
+Data: https://host.com/whisperIM/friends/found?id=xxx&token=xxx&name=xxx
 id    string	my id                         not null
 token string	token                         not null
 name  string    the guy's name searching for  not null
@@ -105,9 +105,9 @@ On Panic:
 {"code":516,"message":"Name Empty","ok":false}
 {"code":517,"message":"Account ID Empty","ok":false}
 
-5) Request Friend https://host.com/im/friends/request  
+5) Request Friend https://host.com/whisperIM/friends/request  
 Protocol: GET
-Data: https://host.com/im/friends/request?id=xxx&token=xxx&to=xxx&note=xxx
+Data: https://host.com/whisperIM/friends/request?id=xxx&token=xxx&to=xxx&note=xxx
 id    string	my id              not null
 token string	token              not null
 to    string    the guy's id       not null
@@ -123,9 +123,9 @@ On Panic:
 {"code":522,"message":"Already Be Friend","ok":false}
 {"code":523,"message":"Friend Not Exists","ok":false}
 
-6) Add Friend https://host.com/im/friends/add  
+6) Add Friend https://host.com/whisperIM/friends/add  
 Protocol: GET
-Data: https://host.com/im/friends/add?id=xxx&token=xxx&from=xxx&name=xxx
+Data: https://host.com/whisperIM/friends/add?id=xxx&token=xxx&from=xxx&name=xxx
 id    string	my id              not null
 token string	token              not null
 from  string    friend's id        not null
@@ -142,9 +142,9 @@ On Panic:
 {"code":522,"message":"Already Be Friend","ok":false}
 {"code":523,"message":"Friend Not Exists","ok":false}
 
-7) Remove Friend https://host.com/im/friends/remove  
+7) Remove Friend https://host.com/whisperIM/friends/remove  
 Protocol: GET
-Data: https://host.com/im/friends/remove?id=xxx&token=xxx&to=xxx
+Data: https://host.com/whisperIM/friends/remove?id=xxx&token=xxx&to=xxx
 id    string	my id         not null
 token string	token         not null
 to    string    friend's id   not null
@@ -187,7 +187,7 @@ wss.sendMessage(JSON.{}) On Panic
 Receive Dialogue
 {"from":"61810e422ec1f24f2175c05a631c9a8f","payload":"How are you ?"}
 
-10) Update Profile https://host.com/im/profile/update    
+10) Update Profile https://host.com/whisperIM/profile/update    
 Protocol: POST
 Data: ajax.Post(JSON.{})
 id       string	  my id    not null
