@@ -31,7 +31,7 @@ On Panic:
 
 3) Login wss://host.com/whisperIM/login
 Protocol: WebSocket
-Data: wss://host.com/whisperIM/login/whisperIM/login?account=xxx&password=xxx
+Data: wss://host.com/whisperIM/login?account=xxx&password=xxx
 account  string	login account not null
 password string	password      not null
 On Success: 
