@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="screen-orientation" content="portrait">
+    <meta name="x5-orientation" content="portrait">
+    <meta name="full-screen" content="yes">
+    <meta name="x5-fullscreen" content="true">
+    <meta name="browsermode" content="application">
+    <meta name="x5-page-mode" content="app">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="black" name="apple-mobile-web-app-status-bar-style">
+    <meta content="telephone=no" name="format-detection">
+    <title>首页</title>
+    <link rel="stylesheet" href="../../styles/css/login/login.css"/>
+    <script src="../../scripts/lib/store/store.min.js"></script>
+	<script src="../../scripts/lib/requirejs/require.js"></script>
+    <script src="../../scripts/config.js"></script>    
+	<script src="../../scripts/func.js"></script>
+     
+    <script>
+        require(['app/login/login'],function(){});
+    </script>
+</head>
+<body> 
+	账号：<input type="text" id="name" /><br/>
+	密码：<input type="password" id="password" /><br/>
+	<a href="###" id="home" >
+		<span>痛快的登录</span>
+	</a>
+	<a href="../register/register.html" id="register" >
+		<span>麻溜的注册</span>
+	</a>
+</body>
+</html>
